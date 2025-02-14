@@ -37,7 +37,7 @@ model Seat {
   status     SeatStatus @default(Available)
 
   cinemaId String
-  cinema   Cinema @relation(fields: [cinemaId], references: [id])
+  cinema   Cinema @relation(fields: [cinemaId], references: [id], onDelete: Cascade)
 
   @@unique([cinemaId, row, seatNumber])
   @@index([cinemaId, row, seatNumber])
