@@ -6,3 +6,40 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Cinema {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name        String
+  rows        Int // how many rows in cinema
+  seatsPerRow Int // how many seats per row in cinema
+
+  seats Seat[]
+
+  @@index([name])
+  @@map("cinemas")
+}
+
+enum SeatStatus {
+  Available
+  Booked
+}
+
+model Seat {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  row        Int
+  seatNumber Int
+  status     SeatStatus @default(Available)
+
+  cinemaId String
+  cinema   Cinema @relation(fields: [cinemaId], references: [id])
+
+  @@unique([cinemaId, row, seatNumber])
+  @@index([cinemaId, row, seatNumber])
+  @@map("seats")
+}
