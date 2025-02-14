@@ -16,6 +16,11 @@ async function bootstrap() {
     }),
   );
 
+  app.enableCors({
+    credentials: true,
+    origin: true,
+  });
+
   // Set global prefix
   app.setGlobalPrefix('api');
 
