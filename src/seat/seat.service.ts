@@ -79,21 +79,19 @@ export class SeatService {
         // Group seats by row
         const rows: { [row: number]: Seat[] } =
           this.groupSeatsByRow(cinemaSeats);
-        if (Object.keys(rows).length === 0) {
-          throw new BadRequestException('No consecutive seats available');
-        }
 
-        // Search for two consecutive available seats
-        let consecutiveSeats = null;
+        let consecutiveSeats: Seat[] = [];
         for (const row of Object.values(rows)) {
           consecutiveSeats = this.findConsecutiveAvailableSeats(row);
-          if (consecutiveSeats) {
+
+          // If we find consecutive seats, we stop searching further
+          if (consecutiveSeats.length > 0) {
             break;
           }
         }
 
         // If no consecutive seats were found, return an error
-        if (!consecutiveSeats.length) {
+        if (consecutiveSeats.length === 0) {
           throw new BadRequestException('No consecutive seats available');
         }
 
@@ -122,7 +120,7 @@ export class SeatService {
     }));
   }
 
-  // group seats by row
+  // Group seats by row
   private groupSeatsByRow(seats: Seat[]) {
     return seats.reduce((rows, seat) => {
       if (!rows[seat.row]) {
@@ -133,7 +131,7 @@ export class SeatService {
     }, {});
   }
 
-  // find two consecutive available seats in a row
+  // Find two consecutive available seats in a row
   private findConsecutiveAvailableSeats(row: Seat[]) {
     for (let i = 0; i < row.length - 1; i++) {
       if (
