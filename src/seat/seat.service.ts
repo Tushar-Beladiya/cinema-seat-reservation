@@ -6,13 +6,18 @@ import {
 import { PrismaService } from 'src/libs/database/prisma';
 import { BookSeatInput } from './dto/bookSeat.input';
 import { Seat, SeatStatus } from '@prisma/client';
+import { CinemaService } from 'src/cinema';
 
 @Injectable()
 export class SeatService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly cinemaService: CinemaService,
+  ) {}
 
   async bookSeat(input: BookSeatInput) {
     const { cinemaId, seatNumber, row } = input;
+    await this.cinemaService.getCinemaById(cinemaId);
     // Use a transaction to ensure the seat status is checked and updated atomically
     const seat = await this.prismaService.$transaction(async (prisma) => {
       // Fetch the seat by cinemaId and seatNumber
@@ -59,6 +64,8 @@ export class SeatService {
   }
 
   async bookConsecutiveSeats(cinemaId: string) {
+    await this.cinemaService.getCinemaById(cinemaId);
+
     const seatsAvailable = await this.prismaService.seat.count({
       where: { cinemaId, status: SeatStatus.Available },
     });

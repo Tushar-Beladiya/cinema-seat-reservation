@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/libs/database/prisma';
 import { CreateCinemaInput } from './dto/createCinema.input';
 
@@ -53,5 +57,17 @@ export class CinemaService {
     });
 
     return { cinemaId: cinema.id };
+  }
+
+  async getCinemaById(cinemaId: string) {
+    const cinema = await this.prismaService.cinema.findUnique({
+      where: { id: cinemaId },
+    });
+
+    if (!cinema) {
+      throw new NotFoundException('Cinema not found');
+    }
+
+    return cinema;
   }
 }
