@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/libs/database/prisma';
 import { CreateCinemaInput } from './dto/createCinema.input';
 
@@ -7,6 +7,19 @@ export class CinemaService {
   constructor(private readonly prismaService: PrismaService) {}
   async createCinema(input: CreateCinemaInput) {
     const { name, rows, seatsPerRow } = input;
+
+    const isCinemaExists = await this.prismaService.cinema.findFirst({
+      where: {
+        name: {
+          equals: name.trim(),
+          mode: 'insensitive',
+        },
+      },
+    });
+
+    if (isCinemaExists) {
+      throw new BadRequestException('Cinema name already exists');
+    }
 
     // Start a transaction to ensure that both cinema and seats are created atomically
     const cinema = await this.prismaService.$transaction(async (prisma) => {
